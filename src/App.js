@@ -15,7 +15,7 @@ import {
   TextField,
   Snackbar
 } from '@material-ui/core';
-import { ExpandMore, ExpandLess, Edit, Check, Clear, Star } from '@material-ui/icons';
+import { ExpandMore, ExpandLess, Edit, Check, Clear, Star, OpenInNew } from '@material-ui/icons';
 import { Alert } from '@material-ui/lab';
 import { useTheme } from '@material-ui/core/styles';
 import CreateRepoForm from './components/CreateRepoForm';
@@ -66,7 +66,18 @@ const App = () => {
 
   return (
     <div>
-      <CreateRepoForm />
+      <CreateRepoForm
+        onSuccess={(msg) => {
+          setSnackbarMessage(msg);
+          setSnackbarSeverity('success');
+          setSnackbarOpen(true);
+        }}
+        onError={(msg) => {
+          setSnackbarMessage(msg);
+          setSnackbarSeverity('error');
+          setSnackbarOpen(true);
+        }}
+      />
 
       <Typography variant="h5" gutterBottom style={{ fontWeight: 600 }}>
         My GitHub Repositories
@@ -84,102 +95,126 @@ const App = () => {
               : '0px 1px 4px rgba(0,0,0,0.1)',
           }}
         >
-          <CardContent
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              cursor: 'pointer',
-            }}
-            onClick={() => setOpenRepoId(openRepoId === repo.id ? null : repo.id)}
-          >
-            <Box>
-              <Typography
-                variant="subtitle1"
-                style={{
-                  color: theme.palette.primary.main,
-                  fontWeight: 600,
-                  marginBottom: '0.3rem'
-                }}
-              >
-                {repo.name}
-              </Typography>
+<CardContent
+  style={{
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    cursor: 'pointer',
+    padding: '16px',
+  }}
+  onClick={(e) => {
+    const targetTag = e.target.tagName.toLowerCase();
+    if (['button', 'svg', 'path', 'input'].includes(targetTag)) return;
+    
+    // Toggle the collapse state instead of opening URL
+    setOpenRepoId(openRepoId === repo.id ? null : repo.id);
+  }}
+>
+  <Box display="flex" alignItems="center" width="100%" justifyContent="space-between">
+    <Typography
+      variant="subtitle1"
+      data-testid={`repo-title-${repo.name}`}
+      style={{
+        color: theme.palette.primary.main,
+        fontWeight: 600,
+        marginBottom: '0.3rem',
+      }}
+    >
+      {repo.name}
+    </Typography>
 
-              <Box display="flex" alignItems="center" gap={1}>
-                {editModeId === repo.id ? (
-                  <>
-                    <TextField
-                      value={editDesc}
-                      onChange={(e) => setEditDesc(e.target.value)}
-                      size="small"
-                      variant="outlined"
-                      fullWidth
-                      style={{ marginRight: '0.5rem' }}
-                    />
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateRepo({
-                          variables: {
-                            repositoryId: repo.id,
-                            description: editDesc
-                          }
-                        });
-                      }}
-                      size="small"
-                      disabled={editDesc === (repo.description || '')}
-                    >
-                      <Check fontSize="small" style={{ color: theme.palette.success.main }} />
-                    </IconButton>
-                    {editDesc === (repo.description || '') && (
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditModeId(null);
-                        }}
-                        size="small"
-                      >
-                        <Clear fontSize="small" style={{ color: theme.palette.text.secondary }} />
-                      </IconButton>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <Typography
-                      variant="body2"
-                      style={{
-                        color: theme.palette.text.primary,
-                        marginRight: '0.5rem'
-                      }}
-                    >
-                      {repo.description || 'No description available'}
-                    </Typography>
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditModeId(repo.id);
-                        setEditDesc(repo.description || '');
-                      }}
-                      size="small"
-                    >
-                      <Edit fontSize="small" style={{ color: theme.palette.text.secondary }} />
-                    </IconButton>
-                  </>
-                )}
-              </Box>
+    {/* Link Icon */}
+    <IconButton
+      onClick={(e) => {
+        e.stopPropagation();
+        window.open(repo.url, '_blank'); // Open URL in new tab
+      }}
+      size="small"
+      aria-label="open repo"
+    >
+      <OpenInNew fontSize="small" />
+    </IconButton>
+  </Box>
 
-              <Box display="flex" alignItems="center" mt={1}>
-                <Star fontSize="small" style={{ color: '#f1c40f', marginRight: 4 }} />
-                <Typography variant="caption" style={{ color: theme.palette.text.secondary }}>
-                  {repo.stargazerCount}
-                </Typography>
-              </Box>
-            </Box>
+  {/* Description directly below the repository name */}
+  <Typography
+    variant="body2"
+    style={{
+      color: theme.palette.text.primary,
+      marginTop: '0.3rem',
+      textAlign: 'left',
+    }}
+  >
+    {repo.description || 'No description available'}
+  </Typography>
 
-            <IconButton>
-              {openRepoId === repo.id ? <ExpandLess /> : <ExpandMore />}
-            </IconButton>
-          </CardContent>
+  {/* Edit Description Button */}
+  {editModeId === repo.id && (
+    <Box display="flex" alignItems="center" gap={1} mt={2}>
+      <TextField
+        value={editDesc}
+        onChange={(e) => setEditDesc(e.target.value)}
+        size="small"
+        variant="outlined"
+        fullWidth
+        style={{ marginRight: '0.5rem' }}
+      />
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          updateRepo({
+            variables: {
+              repositoryId: repo.id,
+              description: editDesc,
+            },
+          });
+        }}
+        size="small"
+        disabled={editDesc === (repo.description || '')}
+        aria-label="save description"
+      >
+        <Check fontSize="small" style={{ color: theme.palette.success.main }} />
+      </IconButton>
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          setEditModeId(null);
+        }}
+        size="small"
+        aria-label="cancel edit"
+      >
+        <Clear fontSize="small" style={{ color: theme.palette.text.secondary }} />
+      </IconButton>
+    </Box>
+  )}
+
+  {/* Show Edit button only if not in edit mode */}
+  {editModeId !== repo.id && (
+    <Box display="flex" alignItems="center" justifyContent="flex-start" mt={1}>
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          setEditModeId(repo.id);
+          setEditDesc(repo.description || '');
+        }}
+        size="small"
+        aria-label="edit description"
+      >
+        <Edit fontSize="small" style={{ color: theme.palette.text.secondary }} />
+      </IconButton>
+    </Box>
+  )}
+
+  {/* Align Star to the left */}
+  <Box display="flex" alignItems="center" mt={1} justifyContent="flex-start">
+    <Star fontSize="small" style={{ color: '#f1c40f', marginRight: 4 }} />
+    <Typography variant="caption" style={{ color: theme.palette.text.secondary }}>
+      {repo.stargazerCount}
+    </Typography>
+  </Box>
+</CardContent>
+
 
           <Collapse in={openRepoId === repo.id} timeout="auto" unmountOnExit>
             <Divider />
@@ -206,15 +241,12 @@ const App = () => {
                         style={{
                           color: theme.palette.primary.main,
                           fontWeight: 500,
-                          textDecoration: 'none'
+                          textDecoration: 'none',
                         }}
                       >
                         {pr.title}
                       </MuiLink>{' '}
-                      <Typography
-                        variant="caption"
-                        style={{ color: theme.palette.text.secondary }}
-                      >
+                      <Typography variant="caption" style={{ color: theme.palette.text.secondary }}>
                         [{pr.state}]
                       </Typography>
                     </li>
