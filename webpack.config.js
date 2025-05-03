@@ -1,11 +1,11 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
-require('dotenv').config();
+const Dotenv = require('dotenv-webpack');
+const path = require('path');
 
 module.exports = {
   entry: './src/index.js',
   output: {
-    path: __dirname + '/dist',
+    path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
   },
   mode: 'development',
@@ -18,13 +18,17 @@ module.exports = {
       },
     ],
   },
-  plugins: [new HtmlWebpackPlugin({ template: './public/index.html' }),
-  new webpack.DefinePlugin({
-    'process.env.REACT_APP_GITHUB_TOKEN': JSON.stringify(process.env.REACT_APP_GITHUB_TOKEN),
-  })
-],
+  plugins: [
+    new HtmlWebpackPlugin({ template: './public/index.html' }),
+    new Dotenv() // ✅ Loads .env variables into the frontend
+  ],
   devServer: {
-    static: './dist',
+    static: {
+      directory: path.join(__dirname, 'dist'),
+    },
     port: 3000,
+  },
+  resolve: {
+    extensions: ['.js', '.jsx'],
   },
 };

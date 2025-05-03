@@ -1,14 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ApolloProvider } from '@apollo/client';
-import client from './apolloClient';
 import App from './App';
-
-// const App = () => <h1>Hello Staple AI</h1>;
+import client from './apolloClient';
+import { ThemeProvider } from './ThemeContext';
+import Layout from './components/Layout';
 
 ReactDOM.render(
   <ApolloProvider client={client}>
-    <App />
+    <ThemeProvider>
+      <Layout>
+        <App />
+      </Layout>
+    </ThemeProvider>
   </ApolloProvider>,
   document.getElementById('root')
 );
