@@ -23,6 +23,8 @@ export const GET_REPOSITORIES_WITH_PRS = gql`
           id
           name
           description
+          url  
+          stargazerCount
           pullRequests(first: 10, orderBy: {field: CREATED_AT, direction: DESC}) {
             nodes {
               id
@@ -36,4 +38,5 @@ export const GET_REPOSITORIES_WITH_PRS = gql`
     }
   }
 `;
+
 
