@@ -9,7 +9,7 @@ import {
   Typography,
   Box,
   CircularProgress,
-} from '@material-ui/core';
+} from '@mui/material';
 
 const CreateRepoForm = ({ onSuccess, onError }) => {
   const [name, setName] = useState('');
