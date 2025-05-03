@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Switch } from '@material-ui/core';
+import { AppBar, Toolbar, Typography, Switch } from '@mui/material'; // Updated from @material-ui/core to @mui/material
 import { useThemeToggle } from '../ThemeContext';
 
 const Layout = ({ children }) => {
@@ -13,7 +13,7 @@ const Layout = ({ children }) => {
           <Switch onChange={toggleTheme} />
         </Toolbar>
       </AppBar>
-      <main style={{ padding: '2rem' }}>{children}</main>
+      {children}
     </>
   );
 };
