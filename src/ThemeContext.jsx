@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useMemo } from 'react';
-import { createMuiTheme, ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
+import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 
 const ThemeToggleContext = createContext();
 
@@ -10,9 +10,9 @@ export const ThemeProvider = ({ children }) => {
 
   const theme = useMemo(
     () =>
-      createMuiTheme({
+      createTheme({
         palette: {
-          type: darkMode ? 'dark' : 'light',
+          mode: darkMode ? 'dark' : 'light',  // Corrected from 'type' to 'mode'
           primary: {
             main: '#2ea44f',
           },
