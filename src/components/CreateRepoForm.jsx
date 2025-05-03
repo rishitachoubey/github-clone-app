@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_REPOSITORY } from '../mutations/createRepo';
+import { GET_REPOSITORIES_WITH_PRS } from '../queries/getRepositories';
 import {
   TextField,
   Button,
@@ -16,6 +17,7 @@ const CreateRepoForm = ({ onSuccess, onError }) => {
   const [desc, setDesc] = useState('');
 
   const [createRepo, { loading }] = useMutation(CREATE_REPOSITORY, {
+    refetchQueries: [{ query: GET_REPOSITORIES_WITH_PRS }],
     onCompleted: (data) => {
       onSuccess?.('Repository created successfully!');
       setName('');

@@ -134,58 +134,12 @@ const App = () => {
               </IconButton>
             </Box>
 
-            <Typography
-              variant="body2"
-              style={{
-                color: theme.palette.text.primary,
-                marginTop: '0.3rem',
-                textAlign: 'left',
-              }}
-            >
-              {repo.description || 'No description available'}
+            <Typography variant="caption" color="textSecondary" style={{ marginBottom: 8 }}>
+              Click to view pull requests
             </Typography>
 
-            {editModeId === repo.id && (
-              <Box display="flex" alignItems="center" gap={1} mt={2}>
-                <TextField
-                  value={editDesc}
-                  onChange={(e) => setEditDesc(e.target.value)}
-                  size="small"
-                  variant="outlined"
-                  fullWidth
-                  style={{ marginRight: '0.5rem' }}
-                />
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    updateRepo({
-                      variables: {
-                        repositoryId: repo.id,
-                        description: editDesc,
-                      },
-                    });
-                  }}
-                  size="small"
-                  disabled={editDesc === (repo.description || '')}
-                  aria-label="save description"
-                >
-                  <Check fontSize="small" style={{ color: theme.palette.success.main }} />
-                </IconButton>
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEditModeId(null);
-                  }}
-                  size="small"
-                  aria-label="cancel edit"
-                >
-                  <Clear fontSize="small" style={{ color: theme.palette.text.secondary }} />
-                </IconButton>
-              </Box>
-            )}
-
             {editModeId !== repo.id && (
-              <Box display="flex" alignItems="center" justifyContent="flex-start" mt={1}>
+              <Box display="flex" alignItems="center" mt={1}>
                 <IconButton
                   onClick={(e) => {
                     e.stopPropagation();
@@ -194,9 +148,16 @@ const App = () => {
                   }}
                   size="small"
                   aria-label="edit description"
+                  style={{ marginRight: '0.5rem' }}
                 >
                   <Edit fontSize="small" style={{ color: theme.palette.text.secondary }} />
                 </IconButton>
+                <Typography
+                  variant="body2"
+                  style={{ color: theme.palette.text.primary }}
+                >
+                  {repo.description || 'No description available'}
+                </Typography>
               </Box>
             )}
 
