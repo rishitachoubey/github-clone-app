@@ -9,28 +9,25 @@ import {
   Typography,
   Box,
   CircularProgress,
-  Link as MuiLink,
 } from '@material-ui/core';
 
-const CreateRepoForm = () => {
+const CreateRepoForm = ({ onSuccess, onError }) => {
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [success, setSuccess] = useState(null);
 
   const [createRepo, { loading }] = useMutation(CREATE_REPOSITORY, {
     onCompleted: (data) => {
-      setSuccess(data.createRepository.repository);
-      setErrorMsg('');
+      onSuccess?.('Repository created successfully!');
       setName('');
       setDesc('');
+      
     },
     onError: (error) => {
       const msg = error?.message || 'Unknown error';
       if (msg.includes('name already exists')) {
-        setErrorMsg('A repository with this name already exists.');
+        onError?.('A repository with this name already exists.');
       } else {
-        setErrorMsg(`${msg}`);
+        onError?.(msg);
       }
     },
   });
@@ -38,7 +35,7 @@ const CreateRepoForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      setErrorMsg('Repository name is required.');
+      onError?.('Repository name is required.');
       return;
     }
     createRepo({ variables: { name: name.trim(), description: desc.trim() } });
@@ -53,21 +50,23 @@ const CreateRepoForm = () => {
 
         <form onSubmit={handleSubmit}>
           <Box display="flex" flexDirection="column" gap={2}>
-            <TextField
-              label="Repository Name"
-              placeholder="e.g. my-new-repo"
-              variant="outlined"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              fullWidth
-            />
+                <TextField
+        label="Repository Name"
+        placeholder="e.g. my-new-repo"
+        variant="outlined"
+        required
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        fullWidth
+        inputProps={{ 'aria-label': 'repository name' }}
+        />
             <TextField
               label="Description (Optional)"
               variant="outlined"
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               fullWidth
+              inputProps={{ 'aria-label': 'description' }}
             />
             <Button
               type="submit"
@@ -79,27 +78,6 @@ const CreateRepoForm = () => {
             </Button>
           </Box>
         </form>
-
-        {success && (
-          <Box mt={2}>
-            <Typography variant="body1" color="primary">
-              ✅ Repository created:&nbsp;
-              <MuiLink
-                href={success.url}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {success.name}
-              </MuiLink>
-            </Typography>
-          </Box>
-        )}
-
-        {errorMsg && (
-          <Box mt={2}>
-            <Typography color="error">❌ {errorMsg}</Typography>
-          </Box>
-        )}
       </CardContent>
     </Card>
   );
