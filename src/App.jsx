@@ -290,19 +290,13 @@ const App = () => {
       {/* Pagination Controls */}
       <Box display="flex" justifyContent="center" mt={2} mb={4}>
         <Button
-          startIcon={<NavigateBefore />}
-          onClick={handleLoadPrevious}
-          disabled={currentPage === 1}
-          style={{ marginRight: '1rem' }}
-        >
-          Previous
-        </Button>
-        <Button
           endIcon={<NavigateNext />}
           onClick={handleLoadMore}
           disabled={!pageInfo.hasNextPage}
+          variant="contained"
+          color="primary"
         >
-          Next
+          Load More
         </Button>
       </Box>
 

@@ -108,18 +108,16 @@ Features demonstrated in the demo:
 ----------------------|---------|----------|---------|---------|
 File                  | % Stmts | % Branch | % Funcs | % Lines |
 ----------------------|---------|----------|---------|---------|
-All files            |   87.2% |    85.5% |   88.9% |   87.2% |
- src/                |   100%  |    100%  |   100%  |   100%  |
-  App.jsx            |   100%  |    100%  |   100%  |   100%  |
-  index.jsx          |   100%  |    100%  |   100%  |   100%  |
-  ThemeContext.jsx   |   100%  |    100%  |   100%  |   100%  |
- src/components/     |   85.7% |    83.3% |   87.5% |   85.7% |
-  CreateRepoForm.jsx |   85.7% |    83.3% |   87.5% |   85.7% |
- src/mutations/      |   88.9% |    85.7% |   90.0% |   88.9% |
-  createRepo.js      |   88.9% |    85.7% |   90.0% |   88.9% |
-  updateRepo.js      |   88.9% |    85.7% |   90.0% |   88.9% |
- src/queries/        |   85.7% |    83.3% |   87.5% |   85.7% |
-  getRepositories.js |   85.7% |    83.3% |   87.5% |   85.7% |
+All files            |   94.11 |    75.00 |   89.65 |   96.38 |
+ src/                |   91.22 |    71.42 |   85.71 |   94.54 |
+  App.jsx            |   91.22 |    71.42 |   85.71 |   94.54 |
+ src/components/     |  100.00 |    87.50 |  100.00 |  100.00 |
+  CreateRepoForm.jsx |  100.00 |    87.50 |  100.00 |  100.00 |
+ src/mutations/      |  100.00 |   100.00 |  100.00 |  100.00 |
+  createRepo.js      |  100.00 |   100.00 |  100.00 |  100.00 |
+  updateRepo.js      |  100.00 |   100.00 |  100.00 |  100.00 |
+ src/queries/        |  100.00 |   100.00 |  100.00 |  100.00 |
+  getRepositories.js |  100.00 |   100.00 |  100.00 |  100.00 |
 ----------------------|---------|----------|---------|---------|
 ```
 
@@ -160,15 +158,14 @@ The application is deployed on Vercel and can be accessed at:
 
 ## 🧪 Testing
 
-<<<<<<< Updated upstream
 The application has comprehensive test coverage using Jest and React Testing Library.
 
 ### Test Coverage Report
-- **Overall Coverage**: 87.2%
-- **Statements**: 86.8%
-- **Branches**: 85.4%
-- **Functions**: 88.1%
-- **Lines**: 87.5%
+- **Overall Coverage**: 94.11%
+- **Statements**: 94.11%
+- **Branches**: 75.00%
+- **Functions**: 89.65%
+- **Lines**: 96.38%
 
 ### Key Test Areas
 - ✅ Repository fetching and rendering
@@ -178,6 +175,9 @@ The application has comprehensive test coverage using Jest and React Testing Lib
 - ✅ Theme switching functionality
 - ✅ Snackbar notifications
 - ✅ GraphQL mutation success/failure cases
+- ✅ Pagination functionality
+- ✅ Multiple repository interactions
+- ✅ Empty repository list handling
 
 ### Running Tests
 ```bash
@@ -188,20 +188,6 @@ For coverage report:
 ```bash
 npm test -- --coverage
 ```
-=======
-The project uses Jest and React Testing Library for testing. Run tests with:
-
-```bash
-npm test
-```
-
-### Test Coverage
-
-- Unit tests for components
-- Integration tests for GraphQL mutations
-- Snapshot tests for UI components
-- Test coverage reports available in `coverage/` directory
->>>>>>> Stashed changes
 
 ---
 
