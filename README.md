@@ -57,7 +57,7 @@ npm install
 Create a `.env` file in the root:
 
 ```
-REACT_APP_GITHUB_TOKEN=your_personal_access_token
+VITE_GITHUB_TOKEN=your_personal_access_token
 ```
 
 > Make sure your token has `repo` scope.
