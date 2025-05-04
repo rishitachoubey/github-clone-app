@@ -16,9 +16,13 @@ export const GET_REPOSITORIES = gql`
   }
 `;
 export const GET_REPOSITORIES_WITH_PRS = gql`
-  query {
+  query($first: Int, $after: String) {
     viewer {
-      repositories(first: 10, orderBy: {field: UPDATED_AT, direction: DESC}) {
+      repositories(first: $first, after: $after, orderBy: {field: UPDATED_AT, direction: DESC}) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
         nodes {
           id
           name

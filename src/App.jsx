@@ -13,15 +13,26 @@ import {
   IconButton,
   Divider,
   TextField,
-  Snackbar
-} from '@mui/material';  // Updated from @material-ui/core to @mui/material
-import { ExpandMore, ExpandLess, Edit, Check, Clear, Star, OpenInNew } from '@mui/icons-material';  // Updated from @material-ui/icons
-import { Alert } from '@mui/material';  // Updated from @material-ui/lab
-import { useTheme } from '@mui/material/styles';  // Updated from @material-ui/core/styles
+  Snackbar,
+  Button,
+  Grid
+} from '@mui/material';
+import { ExpandMore, ExpandLess, Edit, Check, Clear, Star, OpenInNew, NavigateNext, NavigateBefore } from '@mui/icons-material';
+import { Alert } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import CreateRepoForm from './components/CreateRepoForm';
 
+const REPOS_PER_PAGE = 10;
+
 const App = () => {
-  const { loading, error, data } = useQuery(GET_REPOSITORIES_WITH_PRS);
+  const [pageInfo, setPageInfo] = useState({ hasNextPage: false, endCursor: null });
+  const [currentPage, setCurrentPage] = useState(1);
+  const { loading, error, data, fetchMore } = useQuery(GET_REPOSITORIES_WITH_PRS, {
+    variables: { first: REPOS_PER_PAGE },
+    onCompleted: (data) => {
+      setPageInfo(data.viewer.repositories.pageInfo);
+    }
+  });
   const [openRepoId, setOpenRepoId] = useState(null);
   const [editModeId, setEditModeId] = useState(null);
   const [editDesc, setEditDesc] = useState('');
@@ -45,7 +56,40 @@ const App = () => {
     }
   });
 
-  if (loading) {
+  const handleLoadMore = () => {
+    fetchMore({
+      variables: {
+        first: REPOS_PER_PAGE,
+        after: pageInfo.endCursor
+      },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!fetchMoreResult) return prev;
+        return {
+          viewer: {
+            ...prev.viewer,
+            repositories: {
+              ...prev.viewer.repositories,
+              nodes: [...prev.viewer.repositories.nodes, ...fetchMoreResult.viewer.repositories.nodes],
+              pageInfo: fetchMoreResult.viewer.repositories.pageInfo
+            }
+          }
+        };
+      }
+    }).then(({ data }) => {
+      setPageInfo(data.viewer.repositories.pageInfo);
+      setCurrentPage(currentPage + 1);
+    });
+  };
+
+  const handleLoadPrevious = () => {
+    // Note: GitHub's API doesn't support backward pagination directly
+    // This would require a different approach or caching previous pages
+    setSnackbarMessage('Previous page navigation is not supported by GitHub API');
+    setSnackbarSeverity('info');
+    setSnackbarOpen(true);
+  };
+
+  if (loading && !data) {
     return (
       <Box mt={4} textAlign="center">
         <CircularProgress />
@@ -211,16 +255,34 @@ const App = () => {
         </Card>
       ))}
 
+      <Box mt={4} display="flex" justifyContent="center" gap={2}>
+        <Button
+          variant="outlined"
+          startIcon={<NavigateBefore />}
+          onClick={handleLoadPrevious}
+          disabled={currentPage === 1}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outlined"
+          endIcon={<NavigateNext />}
+          onClick={handleLoadMore}
+          disabled={!pageInfo.hasNextPage || loading}
+        >
+          {loading ? <CircularProgress size={24} /> : 'Next'}
+        </Button>
+      </Box>
+
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
-          variant="filled"
+          sx={{ width: '100%' }}
         >
           {snackbarMessage}
         </Alert>
