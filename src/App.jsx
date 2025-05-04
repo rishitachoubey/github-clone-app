@@ -258,19 +258,11 @@ const App = () => {
       <Box mt={4} display="flex" justifyContent="center" gap={2}>
         <Button
           variant="outlined"
-          startIcon={<NavigateBefore />}
-          onClick={handleLoadPrevious}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outlined"
           endIcon={<NavigateNext />}
           onClick={handleLoadMore}
           disabled={!pageInfo.hasNextPage || loading}
         >
-          {loading ? <CircularProgress size={24} /> : 'Next'}
+          {loading ? <CircularProgress size={24} /> : 'Load More'}
         </Button>
       </Box>
 
