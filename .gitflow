@@ -1,0 +1,39 @@
+# GitFlow Configuration
+
+## Branch Structure
+- main: Production-ready code
+- develop: Development branch
+- feature/*: Feature branches
+- release/*: Release preparation branches
+- hotfix/*: Production fixes
+
+## Branch Naming Conventions
+- Feature branches: feature/description-of-feature
+- Release branches: release/vX.Y.Z
+- Hotfix branches: hotfix/description-of-fix
+
+## Commit Message Format
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+
+Types:
+- feat: A new feature
+- fix: A bug fix
+- docs: Documentation changes
+- style: Code style changes (formatting, etc.)
+- refactor: Code changes that neither fix bugs nor add features
+- perf: Performance improvements
+- test: Adding or modifying tests
+- chore: Changes to build process or auxiliary tools
+
+## Merge Strategy
+- Feature branches: Squash and merge into develop
+- Release branches: Merge into main and develop
+- Hotfix branches: Merge into main and develop
+
+## Version Tags
+- Format: vX.Y.Z (Semantic Versioning)
+- Tag message should include release notes 
