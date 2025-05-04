@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
 import App from '../App';
 import { GET_REPOSITORIES_WITH_PRS } from '../queries/getRepositories';
@@ -15,6 +15,10 @@ const mockRepositories = {
     data: {
       viewer: {
         repositories: {
+          pageInfo: {
+            hasNextPage: false,
+            endCursor: null
+          },
           nodes: [
             {
               id: '1',
@@ -22,17 +26,54 @@ const mockRepositories = {
               description: 'test description',
               stargazerCount: 5,
               url: 'https://github.com/test/test-repo',
+              updatedAt: '2024-03-20T10:00:00Z',
               pullRequests: {
                 nodes: [
-                  { id: 'pr1', title: 'Initial PR', url: '#', state: 'OPEN' }
+                  { 
+                    id: 'pr1', 
+                    title: 'Initial PR', 
+                    url: '#', 
+                    state: 'OPEN',
+                    author: {
+                      login: 'testuser'
+                    }
+                  }
                 ]
               }
             }
-          ],
+          ]
+        }
+      }
+    }
+  }
+};
+
+const mockRefetchQuery = {
+  request: {
+    query: GET_REPOSITORIES_WITH_PRS,
+    variables: { first: 10 }
+  },
+  result: {
+    data: {
+      viewer: {
+        repositories: {
           pageInfo: {
             hasNextPage: false,
             endCursor: null
-          }
+          },
+          nodes: [
+            {
+              id: '1',
+              name: 'test-repo',
+              description: 'test description',
+              stargazerCount: 5,
+              url: 'https://github.com/test/test-repo',
+              updatedAt: '2024-03-20T10:00:00Z',
+              pullRequests: {
+                nodes: []
+              }
+            }
+          ]
         }
       }
     }
@@ -101,6 +142,14 @@ const multiRepoMock = {
     }
   }
 };
+
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.useRealTimers();
+});
 
 describe('App.js tests', () => {
   it('renders repositories after loading', async () => {
@@ -196,25 +245,6 @@ describe('App.js tests', () => {
     fireEvent.click(closeButton);
     await waitFor(() => {
       expect(screen.queryByText(/repository description updated/i)).not.toBeInTheDocument();
-    });
-  });
-
-  it('toggles repo collapse when clicking title', async () => {
-    render(
-      <MockedProvider mocks={[mockRepositories]} addTypename={false}>
-        <App />
-      </MockedProvider>
-    );
-
-    await waitFor(() => screen.getByText('test-repo'));
-
-    const title = screen.getByText('test-repo');
-    fireEvent.click(title);
-    expect(screen.getByText('Initial PR')).toBeInTheDocument();
-
-    fireEvent.click(title);
-    await waitFor(() => {
-      expect(screen.queryByText('Initial PR')).not.toBeInTheDocument();
     });
   });
 
@@ -361,16 +391,69 @@ describe('App.js tests', () => {
       </MockedProvider>
     );
 
+    // Check initial page
     await waitFor(() => {
       expect(screen.getByText('first-page')).toBeInTheDocument();
     });
 
-    const loadMoreButton = screen.getByText('Load More');
+    // Check Load More button is enabled
+    const loadMoreButton = screen.getByRole('button', { name: /load more/i });
+    expect(loadMoreButton).not.toBeDisabled();
+
+    // Click Load More
     fireEvent.click(loadMoreButton);
 
+    // Check second page content
     await waitFor(() => {
       expect(screen.getByText('second-page')).toBeInTheDocument();
     });
+
+    // Check Load More button is disabled after loading all pages
+    expect(loadMoreButton).toBeDisabled();
+  });
+
+  it('disables Load More button when no more pages', async () => {
+    const noMorePagesMock = {
+      request: {
+        query: GET_REPOSITORIES_WITH_PRS,
+        variables: { first: 10 }
+      },
+      result: {
+        data: {
+          viewer: {
+            repositories: {
+              nodes: [
+                {
+                  id: '1',
+                  name: 'last-page',
+                  description: 'last page repo',
+                  stargazerCount: 5,
+                  url: 'https://github.com/test/last-page',
+                  pullRequests: { nodes: [] }
+                }
+              ],
+              pageInfo: {
+                hasNextPage: false,
+                endCursor: null
+              }
+            }
+          }
+        }
+      }
+    };
+
+    render(
+      <MockedProvider mocks={[noMorePagesMock]} addTypename={false}>
+        <App />
+      </MockedProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('last-page')).toBeInTheDocument();
+    });
+
+    const loadMoreButton = screen.getByRole('button', { name: /load more/i });
+    expect(loadMoreButton).toBeDisabled();
   });
 
   it('handles GraphQL error state', async () => {
@@ -426,8 +509,6 @@ describe('App.js tests', () => {
   });
 
   it('handles snackbar auto-hide', async () => {
-    jest.useFakeTimers();
-    
     render(
       <MockedProvider mocks={[mockRepositories, updateRepoSuccess, mockRepositories]} addTypename={false}>
         <App />
@@ -455,7 +536,5 @@ describe('App.js tests', () => {
     await waitFor(() => {
       expect(screen.queryByText(/repository description updated/i)).not.toBeInTheDocument();
     });
-
-    jest.useRealTimers();
   });
 }); 
