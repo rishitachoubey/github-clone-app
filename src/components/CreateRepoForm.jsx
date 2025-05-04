@@ -17,12 +17,14 @@ const CreateRepoForm = ({ onSuccess, onError }) => {
   const [desc, setDesc] = useState('');
 
   const [createRepo, { loading }] = useMutation(CREATE_REPOSITORY, {
-    refetchQueries: [{ query: GET_REPOSITORIES_WITH_PRS }],
+    refetchQueries: [{
+      query: GET_REPOSITORIES_WITH_PRS,
+      variables: { first: 10 }  // Match the initial query variables
+    }],
     onCompleted: (data) => {
       onSuccess?.('Repository created successfully!');
       setName('');
       setDesc('');
-      
     },
     onError: (error) => {
       const msg = error?.message || 'Unknown error';
@@ -50,7 +52,7 @@ const CreateRepoForm = ({ onSuccess, onError }) => {
           Create a New Repository
         </Typography>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} role="form">
           <Box display="flex" flexDirection="column" gap={2}>
                 <TextField
         label="Repository Name"
