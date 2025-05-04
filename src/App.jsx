@@ -205,6 +205,44 @@ const App = () => {
               </Box>
             )}
 
+            {editModeId === repo.id && (
+              <Box display="flex" alignItems="center" mt={1}>
+                <TextField
+                  value={editDesc}
+                  onChange={(e) => setEditDesc(e.target.value)}
+                  size="small"
+                  fullWidth
+                  inputProps={{ 'aria-label': 'edit repository description' }}
+                  style={{ marginRight: '0.5rem' }}
+                />
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    updateRepo({
+                      variables: {
+                        repositoryId: repo.id,
+                        description: editDesc
+                      }
+                    });
+                  }}
+                  size="small"
+                  aria-label="save description"
+                >
+                  <Check fontSize="small" style={{ color: theme.palette.success.main }} />
+                </IconButton>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditModeId(null);
+                  }}
+                  size="small"
+                  aria-label="cancel edit"
+                >
+                  <Clear fontSize="small" style={{ color: theme.palette.error.main }} />
+                </IconButton>
+              </Box>
+            )}
+
             <Box display="flex" alignItems="center" mt={1} justifyContent="flex-start">
               <Star fontSize="small" style={{ color: '#f1c40f', marginRight: 4 }} />
               <Typography variant="caption" style={{ color: theme.palette.text.secondary }}>
