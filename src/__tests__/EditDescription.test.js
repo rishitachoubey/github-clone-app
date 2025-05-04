@@ -4,9 +4,13 @@ import { MockedProvider } from '@apollo/client/testing';
 import App from '../App';
 import { GET_REPOSITORIES_WITH_PRS } from '../queries/getRepositories';
 import { UPDATE_REPOSITORY } from '../mutations/updateRepo';
+import '@testing-library/jest-dom';
 
 const fetchMock = {
-  request: { query: GET_REPOSITORIES_WITH_PRS },
+  request: {
+    query: GET_REPOSITORIES_WITH_PRS,
+    variables: { first: 10 }
+  },
   result: {
     data: {
       viewer: {
@@ -16,10 +20,15 @@ const fetchMock = {
               id: 'repo1',
               name: 'editable-repo',
               description: 'Initial description',
+              url: 'https://github.com/test/editable-repo',
               stargazerCount: 0,
               pullRequests: { nodes: [] }
             }
-          ]
+          ],
+          pageInfo: {
+            hasNextPage: false,
+            endCursor: null
+          }
         }
       }
     }
@@ -47,25 +56,113 @@ const updateMock = {
   }
 };
 
-test('edits description with success', async () => {
-  render(
-    <MockedProvider mocks={[fetchMock, updateMock]} addTypename={false}>
-      <App />
-    </MockedProvider>
-  );
+const refetchMock = {
+  request: {
+    query: GET_REPOSITORIES_WITH_PRS,
+    variables: { first: 10 }
+  },
+  result: {
+    data: {
+      viewer: {
+        repositories: {
+          nodes: [
+            {
+              id: 'repo1',
+              name: 'editable-repo',
+              description: 'Updated description',
+              url: 'https://github.com/test/editable-repo',
+              stargazerCount: 0,
+              pullRequests: { nodes: [] }
+            }
+          ],
+          pageInfo: {
+            hasNextPage: false,
+            endCursor: null
+          }
+        }
+      }
+    }
+  }
+};
 
-  await waitFor(() => {
-    expect(screen.getByText('editable-repo')).toBeInTheDocument();
+describe('EditDescription', () => {
+  it('edits description with success', async () => {
+    render(
+      <MockedProvider mocks={[fetchMock, updateMock, refetchMock]} addTypename={false}>
+        <App />
+      </MockedProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('editable-repo')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByLabelText('edit description'));
+
+    const input = screen.getByLabelText('edit repository description');
+    fireEvent.change(input, { target: { value: 'Updated description' } });
+
+    fireEvent.click(screen.getByLabelText('save description'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/repository description updated/i)).toBeInTheDocument();
+    });
   });
 
-  fireEvent.click(screen.getAllByLabelText(/edit description/i)[0]);
+  it('handles error when updating description', async () => {
+    const errorMock = {
+      request: {
+        query: UPDATE_REPOSITORY,
+        variables: {
+          repositoryId: 'repo1',
+          description: 'Error description'
+        }
+      },
+      error: new Error('Failed to update')
+    };
 
-  const input = screen.getByDisplayValue(/initial description/i);
-  fireEvent.change(input, { target: { value: 'Updated description' } });
+    render(
+      <MockedProvider mocks={[fetchMock, errorMock]} addTypename={false}>
+        <App />
+      </MockedProvider>
+    );
 
-  fireEvent.click(screen.getByLabelText(/save description/i));
+    await waitFor(() => {
+      expect(screen.getByText('editable-repo')).toBeInTheDocument();
+    });
 
-  await waitFor(() => {
-    expect(screen.getByText(/description updated/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('edit description'));
+
+    const input = screen.getByLabelText('edit repository description');
+    fireEvent.change(input, { target: { value: 'Error description' } });
+
+    fireEvent.click(screen.getByLabelText('save description'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/failed to update/i)).toBeInTheDocument();
+    });
+  });
+
+  it('cancels editing description', async () => {
+    render(
+      <MockedProvider mocks={[fetchMock]} addTypename={false}>
+        <App />
+      </MockedProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('editable-repo')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByLabelText('edit description'));
+
+    const input = screen.getByLabelText('edit repository description');
+    fireEvent.change(input, { target: { value: 'Changed description' } });
+
+    fireEvent.click(screen.getByLabelText('cancel edit'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Initial description')).toBeInTheDocument();
+    });
   });
 });
